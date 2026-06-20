@@ -150,11 +150,9 @@ Al finalizar, Serverless muestra en pantalla las URLs de los endpoints. Estas se
 
 ```
 endpoints:
-  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/upload-url
-  POST - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/profile
-  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/profile
-  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/results
-  POST - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/redrive
+  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/
+  POST - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/p
+  ....
 ```
 
 ---
