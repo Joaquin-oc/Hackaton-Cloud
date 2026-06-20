@@ -10,7 +10,7 @@
 
 ## ¿Qué es JobMatch AI?
 
-JobMatch AI es una plataforma que permite al candidato subir un archivo CSV con ofertas laborales. El sistema procesa cada oferta de forma **asíncrona** usando un modelo de lenguaje (LLM) a través de la **API de Groq**, y devuelve un análisis personalizado de compatibilidad basado en el perfil del usuario.
+JobMatch AI es una plataforma que permite al candidato subir un archivo CSV con ofertas laborales. El sistema procesa cada oferta de forma **asíncrona** usando un modelo de lenguaje (LLM) a través de la **API de Groq** en el modelo openai/gpt-oss-20b, y devuelve un análisis personalizado de compatibilidad basado en el perfil del usuario.
 
 ---
 
