@@ -1,0 +1,139 @@
+org: joaquinocana
+service: api-ofertas
+
+provider:
+  name: aws
+  runtime: python3.12
+  memorySize: 1024
+  timeout: 30
+  iam:
+    role: arn:aws:iam::728115922510:role/LabRole
+  environment:
+    TABLE_USUARIOS: ${sls:stage}-usuarios
+    TABLE_SESIONES: ${sls:stage}-sesiones
+    TABLE_RESULTADOS: ${sls:stage}-resultados_ofertas
+    SQS_URL: !Ref OfertasQueue
+    GROQ_API_KEY: ${env:GROQ_API_KEY}
+
+functions:
+
+  # -------- AUTH --------
+  registro:
+    handler: Registro.lambda_handler
+    events:
+      - http:
+          path: /usuario/registro
+          method: post
+          cors: true
+          integration: lambda
+
+  login:
+    handler: Login.lambda_handler
+    events:
+      - http:
+          path: /usuario/login
+          method: post
+          cors: true
+          integration: lambda
+
+  validarSesion:
+    handler: ValidarSesion.lambda_handler
+    events:
+      - http:
+          path: /usuario/validar
+          method: get
+          cors: true
+          integration: lambda
+
+  # -------- FLUJO DE OFERTAS --------
+  ingestor:
+    handler: Ingestor.lambda_handler
+    events:
+      - http:
+          path: /oferta/procesar
+          method: post
+          cors: true
+          integration: lambda
+
+  procesador:
+    handler: Procesador.lambda_handler
+    timeout: 60
+    events:
+      - sqs:
+          arn: !GetAtt OfertasQueue.Arn
+          batchSize: 1
+
+  getResultados:
+    handler: GetResultados.lambda_handler
+    events:
+      - http:
+          path: /oferta/resultados
+          method: get
+          cors: true
+          integration: lambda
+
+resources:
+  Resources:
+
+    # ---------- DYNAMODB ----------
+    TablaUsuarios:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_USUARIOS}
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    TablaSesiones:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_SESIONES}
+        AttributeDefinitions:
+          - AttributeName: token
+            AttributeType: S
+        KeySchema:
+          - AttributeName: token
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+    TablaResultados:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.TABLE_RESULTADOS}
+        AttributeDefinitions:
+          - AttributeName: sesion_id
+            AttributeType: S
+          - AttributeName: oferta_id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sesion_id
+            KeyType: HASH
+          - AttributeName: oferta_id
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+    # ---------- SQS ----------
+    OfertasDLQ:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${sls:stage}-ofertas-dlq
+        MessageRetentionPeriod: 1209600
+
+    OfertasQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${sls:stage}-ofertas-queue
+        VisibilityTimeout: 60
+        RedrivePolicy:
+          deadLetterTargetArn: !GetAtt OfertasDLQ.Arn
+          maxReceiveCount: 3
+
+    # ---------- S3 ----------
+    BucketCSV:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${sls:stage}-hackathon-ofertas-csv
