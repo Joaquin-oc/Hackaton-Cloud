@@ -1,127 +1,218 @@
-# Hackaton UTEC Cloud Computing 2026-1  <img width="22" height="18" alt="image" src="https://github.com/user-attachments/assets/523cd109-270b-451a-86eb-d49ca1e7f8b9" />
+# JobMatch AI 
+### Hackathon UTEC — Cloud Computing 2026-1
 
-
-Integrantes:
+**Integrantes:**
 - Joaquin Andre Ocaña Aniya
 - Benjamin Mario Augusto Suarez Arzapalo
 - Valeria Valentina Ríos Gómez
 
-Solución: 
+---
 
-JOBMATCH AI es una plataforma que permite al candidato subir un archivo CSV con cantidad de ofertas laborales. El sistema procesa cada oferta de forma asíncrona usando un modelo de lenguaje (LLM) a través de la **API de Groq**, y devuelve un análisis personalizado basado en el perfil del usuario.
+## ¿Qué es JobMatch AI?
 
-## Despliegue Paso a Paso
+JobMatch AI es una plataforma que permite al candidato subir un archivo CSV con ofertas laborales. El sistema procesa cada oferta de forma **asíncrona** usando un modelo de lenguaje (LLM) a través de la **API de Groq**, y devuelve un análisis personalizado de compatibilidad basado en el perfil del usuario.
 
-### Descripción
+---
 
-JobMatch AI utiliza Serverless Framework para definir toda la infraestructura como codigo (IaC). El despliegue se realiza desde una instancia EC2 a partir de una AMI llamado Cloud9Ubuntu22. 
+## 🏗️ Arquitectura
 
-### Configuración de Instancia 
-• Paso 1: Ingresar al servicio EC2
-• Paso 2: Ingresar al menú “Imágenes” / “AMI”
-• Paso 3: Buscar “Imágenes públicas” y Cloud9ubuntu22
-• Paso 4: Elegir la más reciente y botón “Lanzar instancia a partir de
-una AMI”
-• Paso 5: Elija “Par de claves” = “vockey”
-• Paso 6: En “Configuraciones de Red” marcar:
-     “Permitir el tráfico de SSH desde” “Cualquier lugar”
-     “Permitir el tráfico de HTTP desde Internet” “Cualquier lugar”
-• Paso 7: Configurar 20 Gb de almacenamiento
-• Paso 8: Botón “Lanzar instancia”
+El despliegue utiliza **Serverless Framework** para definir toda la infraestructura como código (IaC). El entorno de despliegue es una instancia EC2 creada a partir de la AMI pública `Cloud9Ubuntu22`.
 
-#### Instalaciones e Configuraciones
+El `serverless.yml` crea automáticamente:
+- 7 funciones Lambda con sus triggers configurados
+- 1 cola SQS principal para el procesamiento de ofertas
+- 1 Dead Letter Queue (DLQ) para mensajes fallidos tras 3 intentos automáticos
+- 3 tablas DynamoDB
+- API Gateway con todos los endpoints HTTP
+- Roles y permisos IAM necesarios
 
-1. Verificar que tiene instalado node.js > v20, npm y  aws CLI. 
-Correr los siguientes comandos.
+---
+
+## 🚀 Despliegue Paso a Paso
+
+### 1. Configurar la instancia EC2
+
+1. Ir al servicio **EC2** en AWS Console
+2. En el menú lateral ir a **Imágenes → AMI**
+3. Seleccionar **Imágenes públicas** y buscar `Cloud9Ubuntu22`
+4. Elegir la versión más reciente y hacer clic en **Lanzar instancia a partir de una AMI**
+5. En **Par de claves** seleccionar `vockey`
+6. En **Configuración de red** habilitar:
+   - Permitir tráfico SSH desde: `Cualquier lugar`
+   - Permitir tráfico HTTP desde Internet: `Cualquier lugar`
+7. Configurar **20 GB** de almacenamiento
+8. Hacer clic en **Lanzar instancia**
+
+---
+
+### 2. Instalaciones y configuraciones
+
+#### 2.1 Verificar Node.js, npm y AWS CLI
+
 ```bash
-node -v
+node -v        # debe ser v20 o superior
 npm -v
 aws --version
 ```
-2. Ademas instalar serverless.
+
+> ⚠️ Si Node.js no está instalado o es menor a v20, ejecutar:
+> ```bash
+> curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+> sudo apt-get install -y nodejs
+> ```
+
+#### 2.2 Instalar Serverless Framework
+
 ```bash
 sudo npm install -g serverless
+serverless --version
 ```
-3. Acceda o cree el directorio /home/ubuntu/.aws. Ademas cree el archivo credentials dentro del directorio anterior con el contenido de las credenciales de acceso a AWS.
+
+#### 2.3 Configurar credenciales de AWS
+
 ```bash
-mkdir .aws
-cd .aws
+mkdir ~/.aws
+cd ~/.aws
 nano credentials
 ```
-4. Cree un usuario en https://www.serverless.com/ con su correo de @utec y un nombre de Organization. 
-<img width="393" height="64" alt="Captura de pantalla 2026-06-20 a la(s) 4 40 21 p  m" src="https://github.com/user-attachments/assets/8443c8b9-8fc4-4fce-b81e-97ca4f44c67a" />
 
-#### Clonar el repositorio 
-- Haga git clone del directorio /home/ubuntu/ de este repositorio. Ingrese a la carpeta lambdas
-```bash
-git clone https://github.com/Joaquin-oc/Hackaton-Cloud.git
-cd Hackaton-Cloud
-cd lambdas
+Pegar el contenido de las credenciales de acceso a AWS con el siguiente formato:
+
 ```
-La estructura del proyecto es:
+[default]
+aws_access_key_id = TU_ACCESS_KEY
+aws_secret_access_key = TU_SECRET_KEY
+aws_session_token = TU_SESSION_TOKEN
+```
 
-- Modificar el org y role en serverless.yml
-<img width="393" height="210" alt="Captura de pantalla 2026-06-20 a la(s) 4 46 10 p  m" src="https://github.com/user-attachments/assets/51162b22-0fb3-46d9-8d74-db106207fd40" />
+#### 2.4 Crear cuenta en Serverless Dashboard
 
-- Login a serverless y confirmar al correo electronico. 
+Crear un usuario en [https://www.serverless.com/](https://www.serverless.com/) con tu correo `@utec.edu.pe` y un nombre de organización.
+
+---
+
+### 3. Clonar el repositorio
+
+```bash
+cd /home/ubuntu/
+git clone https://github.com/Joaquin-oc/Hackaton-Cloud.git
+cd Hackaton-Cloud/lambdas
+```
+
+Estructura del proyecto:
+
+---
+
+### 4. Configurar el serverless.yml
+
+Modificar los campos `org` y `role` en el archivo `serverless.yml` con los datos de tu cuenta de Serverless Dashboard:
+
+```yaml
+org: TU_ORGANIZACION      # nombre de tu org en serverless.com
+app: jobmatch-ai
+```
+
+---
+
+### 5. Login a Serverless Dashboard
+
 ```bash
 serverless login
 ```
-- Exportar la variable del entorno de la API KEY DE GROG. (API AI)
+
+Confirmar el login desde el enlace enviado a tu correo electrónico.
+
+---
+
+### 6. Configurar la API Key de Groq
+
 ```bash
-export GROG_API_KEY = 
+export GROQ_API_KEY=tu_api_key_aqui
 ```
-#### Sobre el contendio del serveless.yml 
-Este archivo define toda la infraestructura de JobMatch AI. No necesita crear nada manualmente en la consola de AWS.
 
-El serverless.yml crea automaticamente:
-•	7 funciones Lambda con sus triggers configurados
-•	1 cola SQS principal 
-•	1 Dead Letter Queue para mensajes fallidos despues de 3 intentos automaticos. 
-•	3 tablas DynamoDB
-•	API Gateway con todos los endpoints HTTP
-•	Roles y permisos IAM necesarios
+> ⚠️ Obtener la API Key en [https://console.groq.com/keys](https://console.groq.com/keys)
 
-#### Desplegar Infraestructura
-- Deployar por defecto en stage dev. 
+---
+
+### 7. Desplegar la infraestructura
+
 ```bash
 serverless deploy
 ```
-o
+
+o de forma abreviada:
 
 ```bash
 sls deploy
 ```
-- Al finalizar, Serverless muestra en pantalla las url's de los endpoints. Estas se configuran en el frontend para invocar a nuestros lambdas. Tambien utilizadas para pruebas en postman. 
 
+Al finalizar, Serverless muestra en pantalla las URLs de los endpoints. Estas se configuran en el frontend para invocar las Lambdas y también pueden usarse para pruebas en Postman.
 
-### Despliegue del frontend 
+```
+endpoints:
+  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/upload-url
+  POST - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/profile
+  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/profile
+  GET  - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/results
+  POST - https://xxxxxxx.execute-api.us-east-1.amazonaws.com/redrive
+```
 
-### Probar la Plataforma Completa
+---
 
-#### Flujo de prueba paso a paso
-1.	Abrir la URL del frontend en el navegador
-2.	Registrar perfil: ingresar skills, anos de experiencia y salario esperado
-3.	Hacer clic en 'Subir CSV' y seleccionar ofertas_prueba.csv
-4.	Hacer clic en 'Analizar ofertas'
-5.	Esperar 2 a 3 minutos — la tabla se llena en tiempo real
-6.	Verificar que cada oferta muestra score, skills match y resumen
+### 8. Desplegar el Frontend
 
+> 🚧 Próximamente
 
+---
 
+## 🧪 Probar la Plataforma
 
+### Preparar el CSV de prueba
 
+Crear un archivo `ofertas_prueba.csv` con el siguiente formato (25 a 30 filas):
 
+```csv
+titulo,empresa,descripcion,salario,ubicacion
+Data Analyst,BCP,Python SQL Power BI 3 años exp,3000-4000,Lima
+Backend Developer,Interbank,Node.js AWS Docker 5 años exp,5000-7000,Remoto
+Data Scientist,Belcorp,Machine Learning Scikit-learn MLOps,6000-8000,Lima
+```
 
+### Flujo de prueba paso a paso
 
+1. Abrir la URL del frontend en el navegador
+2. Registrar perfil: ingresar skills, años de experiencia y salario esperado
+3. Hacer clic en **Subir CSV** y seleccionar `ofertas_prueba.csv`
+4. Hacer clic en **Analizar ofertas**
+5. Esperar 2 a 3 minutos — la tabla se llena en tiempo real
+6. Verificar que cada oferta muestra: score, skills que coinciden, skills faltantes y resumen
 
+### Verificar el flujo de reintentos
 
+1. Subir un CSV con 30 ofertas para generar rate limit en Groq
+2. En **AWS Console → SQS → jobmatch-ofertas-queue**: verificar mensajes procesados
+3. Si hay mensajes en la DLQ, hacer clic en **Reprocesar fallidos** en el frontend
+4. Verificar en DynamoDB que todos los registros tienen estado `completado`
 
+### Ver logs en tiempo real
 
+```bash
+serverless logs -f processor --tail
+```
 
+---
 
+## Solución de problemas frecuentes
 
+**Error: Rate limit de Groq**
+- Es esperado con 30 ofertas simultáneas. SQS reintenta automáticamente hasta 3 veces. 
 
+**Error: AccessDeniedException durante el deploy**
+- Verificar que las credenciales en `~/.aws/credentials` son correctas y tienen permisos suficientes.
 
+**Los resultados no aparecen en el frontend**
+- Verificar que la URL del API Gateway está correctamente configurada en el frontend.
+- Revisar en DynamoDB que los registros existen con estado `completado`.
 
-
+**La Lambda 2 no se dispara al subir el CSV**
+- Verificar el trigger S3 en `serverless.yml` y redesplegar: `serverless deploy function -f ingestor`
