@@ -14,7 +14,7 @@ JobMatch AI es una plataforma que permite al candidato subir un archivo CSV con 
 
 ---
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 El despliegue utiliza **Serverless Framework** para definir toda la infraestructura como código (IaC). El entorno de despliegue es una instancia EC2 creada a partir de la AMI pública `Cloud9Ubuntu22`.
 
@@ -28,7 +28,7 @@ El `serverless.yml` crea automáticamente:
 
 ---
 
-## 🚀 Despliegue Paso a Paso
+## Despliegue Paso a Paso
 
 ### 1. Configurar la instancia EC2
 
@@ -161,11 +161,10 @@ endpoints:
 
 ### 8. Desplegar el Frontend
 
-> 🚧 Próximamente
 
 ---
 
-## 🧪 Probar la Plataforma
+## Probar la Plataforma
 
 ### Preparar el CSV de prueba
 
