@@ -158,11 +158,29 @@ endpoints:
 ---
 
 ### 8. Desplegar el Frontend
+1. Clone este repositorio en su maquina local..
+2. Moverse a la carpeta /frontend e instalar dependencias
+```bash
+cd frontend
+npm install
+```
 
+2. Crear la carpeta dist, el contenido que subes al bucket s3 y que referencia Amplify.
+```bash
+npm run build
+```
+
+3. Desde Amplify, configurar:
+<img width="1426" height="488" alt="Captura de pantalla 2026-06-20 a la(s) 6 56 46 p  m" src="https://github.com/user-attachments/assets/6e25e18f-37b7-4ba2-a808-24e08eeba25c" />
+
+y luego seleccionar método Amazon s3 
+<img width="1426" height="488" alt="Captura de pantalla 2026-06-20 a la(s) 6 57 54 p  m" src="https://github.com/user-attachments/assets/5201b1ef-aa7d-4580-a4da-7b3a19b3746b" />
 
 ---
 
 ## Probar la Plataforma
+
+Desde la url de Amplify:
 
 ### Preparar el CSV de prueba
 
