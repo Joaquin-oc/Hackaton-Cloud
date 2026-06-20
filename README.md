@@ -204,14 +204,10 @@ serverless logs -f processor --tail
 ## Solución de problemas frecuentes
 
 **Error: Rate limit de Groq**
-- Es esperado con 30 ofertas simultáneas. SQS reintenta automáticamente hasta 3 veces. 
+- Es esperado con 30 ofertas simultáneas. SQS reintenta automáticamente hasta 3 veces. Luego de 5 minutos, el lambda 7 vuelve enviarlos a la cola principal para reintentar.
 
 **Error: AccessDeniedException durante el deploy**
 - Verificar que las credenciales en `~/.aws/credentials` son correctas y tienen permisos suficientes.
 
 **Los resultados no aparecen en el frontend**
 - Verificar que la URL del API Gateway está correctamente configurada en el frontend.
-- Revisar en DynamoDB que los registros existen con estado `completado`.
-
-**La Lambda 2 no se dispara al subir el CSV**
-- Verificar el trigger S3 en `serverless.yml` y redesplegar: `serverless deploy function -f ingestor`
